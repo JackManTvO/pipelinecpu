@@ -85,22 +85,24 @@ endmodule
 
     module mux_pc(
         input [31:0] I_off,
-        input [31:0] I_j,
+        //input [31:0] I_j,
         input [31:0] I_pc,
-
         input I_c,
-        output [31:0]O_out
+
+        output [31:0]O_out,
+        output [31:0]O_output_npc
     );
 reg [31:0] R_out;
 always @ (*) begin
     case (I_c)
         1:
-            R_out<=I_j;
+            R_out<=I_off;
         0:
             R_out<=I_off+I_pc;
     endcase
 end
 assign O_out=R_out;
+assign O_output_npc=R_out+4;
 endmodule
 
 

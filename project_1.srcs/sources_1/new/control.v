@@ -29,9 +29,8 @@ module control(
            output [2:0] O_rwd_mux,
            output O_rwa_mux,
            output [1:0]O_pc_mux,
-           output [2:0]O_offset_mux,
            output [3:0]O_cA,
-           output [1:0]O_cB,
+           output [2:0]O_cB,
            output [1:0] O_cE,
            output wire O_jumprs
        );
@@ -195,9 +194,6 @@ assign O_pc_mux=(W_inst_type==7||
             W_inst_type==32||
             W_inst_type==33)?1:0;
 
-
-assign O_offset_mux=(W_inst_type==6)?3'b001:(W_inst_type==9)?3'b010:(W_inst_type==10)?3'b011:(W_inst_type==11)?3'b100:3'b000;
-
 assign O_cA=(
               W_inst_type==1||
               W_inst_type==2||
@@ -248,10 +244,15 @@ assign O_cA=(
            W_inst_type==31)?12:13;
 
 
-assign O_cB=(W_inst_type==7||
-            W_inst_type==8)?2'b01:
+assign O_cB=(W_inst_type==6)?3'b001:
+            (W_inst_type==9)?3'b010:
+            (W_inst_type==10)?3'b011:
+            (W_inst_type==11)?3'b100:
+            (W_inst_type==7||
+            W_inst_type==8)?3'b101:
             (W_inst_type==32||
-            W_inst_type==33)?2'b10:2'b00;
+            W_inst_type==33)?3'b110:3'b000;
+
 assign O_cE=(
         W_inst_type==0
         )?2'b00:
