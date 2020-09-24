@@ -21,7 +21,7 @@
 
 
 module alu(
-           input [4:0]  I_cA,
+           input [3:0]  I_cA,
            input [4:0]  sa,
            input [31:0] I_alu_num1,
            input [31:0] I_alu_num2,
@@ -36,7 +36,7 @@ wire[4:0] displacement;
 assign displacement =
        (I_cA == 7 ||
         I_cA == 9 ||
-        I_cA == 28) ? sa : I_alu_num1[4:0];
+        I_cA == 11) ? sa : I_alu_num1[4:0];
 
 assign overflow = (R_alu[32]!=R_alu[31])? 1:0;
 

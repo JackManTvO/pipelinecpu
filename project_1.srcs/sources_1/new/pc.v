@@ -22,10 +22,15 @@
 
 module pc(
 
-           input I_clk,
-           input I_rst,
-           input [31:0] I_pc,
-           output [31:0] O_pc
+            input I_clk,
+            input I_rst,
+            input [31:0] I_pc,
+
+            //input I_nop_pc,
+            input I_pause,
+
+            output [31:0] O_pc
+
        );
 
 reg [31:0] R_pc;
@@ -35,7 +40,15 @@ always @ (posedge I_clk) begin
         R_pc <= 32'h0;
     end
     else begin
-        R_pc<= I_pc;
+        // if(I_nop_pc==0) begin
+        //     R_pc<= 32'b0;
+        // end
+        if(I_pause) begin
+            //
+        end
+        else begin
+            R_pc <= I_pc;
+        end
     end
 end
 assign O_pc=R_pc;

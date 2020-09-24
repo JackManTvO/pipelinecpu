@@ -44,19 +44,22 @@ endmodule
         input [31:0] I_ext,
         input [31:0] I_alu,
         input [31:0] I_dm,
+        input [31:0] I_nnpc,
 
-        input [1:0] I_c,
+        input [2:0] I_c,
         output [31:0]O_out
     );
 reg [31:0] R_out;
 always @ (*) begin
     case (I_c)
-        2'b00:
+        3'b000:
             R_out<=I_ext;
-        2'b01:
+        3'b001:
             R_out<=I_alu;
-        2'b10:
+        3'b010:
             R_out<=I_dm;
+        3'b011:
+            R_out<=I_nnpc;
     endcase
 end
 assign O_out=R_out;
@@ -70,15 +73,16 @@ endmodule
         input I_c,
         output [4:0]O_out
     );
-reg [4:0] R_out;
-always @ (*) begin
-    case (I_c)
-        1:
-            R_out<=I_rd;
-        0:
-            R_out<=I_rt;
-    endcase
-end
+wire [4:0] R_out;
+// always @ (*) begin
+//     case (I_c)
+//         1:
+//             R_out<=I_rd;
+//         0:
+//             R_out<=I_rt;
+//     endcase
+// end
+assign R_out=I_c?I_rd:I_rt;
 assign O_out=R_out;
 endmodule
 

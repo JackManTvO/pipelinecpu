@@ -115,13 +115,12 @@ iMem iMem(
 
 
 wire [31:0]br_offset;
-wire [31:0]pc_mux;
 wire c_pc_mux;
 wire [31:0]mux_npc;
 
 mux_pc mux_pc(
                 .I_off(br_offset),
-                .I_pc(pc_mux),
+                .I_pc(pc_inst),
                 .I_c(c_pc_mux),
                 .O_out(new_pc),
                 .O_output_npc(mux_npc)
@@ -188,11 +187,12 @@ br br(
 wire c_regwrite_en;
 wire [4:0] WriteRegW;
 wire [31:0] ResultW;
+wire mem_c_reg_w;
 
 regfile regfile(
             .I_clk(I_clk),
 
-            .I_reg_we(c_regwrite_en),
+            .I_reg_we(mem_c_reg_w),
             .I_rs_addr(if_InstrRs),
             .I_rt_addr(if_InstrRt),
             .I_wb_addr(WriteRegW),
@@ -460,5 +460,75 @@ EXE EXE(
 
 );
 
+// module dMem(
+//            input I_clk,
+//            input I_we,
+
+//            input [11:2] I_addr,
+//            input [31:0] I_wdata,
+
+//            output [31:0] O_rdata
+//        );
+
+wire[31:0] dmem_data;
+
+dMem dMem(
+            .I_clk(I_clk),
+            .I_we(exe_c_mem_w),
+            .I_addr(exe_alu_res[11:2]),
+            .I_wdata(exe_reg2_data),
+            .O_rdata(dmem_data)
+);
+
+wire[31:0] mem_alu_res;
+wire[31:0] mem_dmem_data;
+wire[31:0] mem_nnpc;
+wire[31:0] mem_ext_res;
+wire[4:0] mem_dst_reg;
+
+wire[2:0] mem_c_reg_src;
+
+
+MEM MEM(
+        .clk(I_clk),
+        .rst(I_rst),
+        .I_alu_result(exe_alu_res),
+        .I_read_mem_data(dmem_data),
+        .I_nnpc(exe_nnpc),
+        .I_extended_imm(exe_ext_res),
+        .I_dst_reg(exe_dst_reg),
+
+        .I_reg_src(exe_c_reg_src),
+        .I_reg_write(exe_c_reg_w),
+
+        .O_alu_result(mem_alu_res),
+        .O_read_mem_data(mem_dmem_data),
+        .O_nnpc(mem_nnpc),
+        .O_extended_imm(mem_ext_res),
+        .O_dst_reg(mem_dst_reg),
+
+        .O_reg_src(mem_c_reg_src),
+        .O_reg_write(mem_c_reg_w)
+        );
+
+    // module mux_rwd(
+    //     input [31:0] I_ext,
+    //     input [31:0] I_alu,
+    //     input [31:0] I_dm,
+    //     input [31:0] I_nnpc,
+
+    //     input [2:0] I_c,
+    //     output [31:0]O_out
+    // );
+
+mux_rwd mux_rwd(
+.I_ext(mem_ext_res),
+.I_alu(mem_alu_res),
+.I_dm(mem_dmem_data),
+.I_nnpc(mem_nnpc),
+
+.I_c(mem_c_reg_src),
+.O_out(ResultW)
+);
 
 endmodule

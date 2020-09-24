@@ -22,32 +22,51 @@ module ID(
             input wire                          I_mem_write,
             input wire[2:0]                     I_reg_src,
             input wire[1:0]                     I_reg_dst,
-            //input wire[3:0]                   stall_C,
+
+            input wire                   I_pause,//control
             //input wire[31:0]                    lw_stall_data,
             //input wire[4:0]                     lw_mem_addr,
 
-            output reg[31:0]    O_reg1_data,
-            output reg[31:0]    O_reg2_data,
-            output reg[31:0]    O_nnpc,
+            output [31:0]    O_reg1_data,
+            output [31:0]    O_reg2_data,
+            output [31:0]    O_nnpc,
             //output reg[4:0]                   rs_out,
-            output reg[4:0]     O_rt,
-            output reg[4:0]     O_rd,
-            output reg[4:0]     O_sa,
-            output reg[15:0]    O_imm16,
+            output [4:0]     O_rt,
+            output [4:0]     O_rd,
+            output [4:0]     O_sa,
+            output [15:0]    O_imm16,
 
-            output reg          O_reg_write,
+            output           O_reg_write,
             //output reg                        en_lw_id_ex_out,
-            output reg[1:0]     O_ext_op,
-            output reg          O_alu_src,
-            output reg[3:0]     O_alu_op,
-            output reg          O_mem_write,
-            output reg[2:0]     O_reg_src,
-            output reg[1:0]     O_reg_dst
+            output [1:0]     O_ext_op,
+            output           O_alu_src,
+            output [3:0]     O_alu_op,
+            output           O_mem_write,
+            output [2:0]     O_reg_src,
+            output [1:0]     O_reg_dst
        );
 
 // if rst/halt, zeroize all registers
 wire zeroize;
 assign zeroize = rst;
+
+reg[31:0]    R_reg1_data;
+reg[31:0]    R_reg2_data;
+reg[31:0]    R_nnpc;
+//output reg[4:0]                   rs_out,
+reg[4:0]     R_rt;
+reg[4:0]     R_rd;
+reg[4:0]     R_sa;
+reg[15:0]    R_imm16;
+
+reg          R_reg_write;
+//output reg                        en_lw_id_ex_out,
+reg[1:0]     R_ext_op;
+reg          R_alu_src;
+reg[3:0]     R_alu_op;
+reg          R_mem_write;
+reg[2:0]     R_reg_src;
+reg[1:0]     R_reg_dst;
 
 // state machine for stalling
 //reg[1:0] temp_state;
@@ -67,28 +86,28 @@ always @ (posedge clk) begin
     */
 
     if (zeroize) begin
-        O_reg1_data    <= 32'b0;
-        O_reg2_data    <= 32'b0;
-        O_nnpc      <= 32'b0;
+        R_reg1_data    <= 32'b0;
+        R_reg2_data    <= 32'b0;
+        R_nnpc      <= 32'b0;
         //rs_out           <= 5'b0;
-        O_rt           <= 5'b0;
-        O_rd           <= 5'b0;
-        O_sa           <= 5'b0;
-        O_imm16        <= 16'b0;
+        R_rt           <= 5'b0;
+        R_rd           <= 5'b0;
+        R_sa           <= 5'b0;
+        R_imm16        <= 16'b0;
 
-        O_reg_write <= 0;
+        R_reg_write <= 0;
 
-        O_ext_op    <= 2'b0;
-        O_alu_src   <= 1'b0;
-        O_alu_op    <= 0;
-        O_mem_write <= 0;
-        O_reg_src   <= 0;
-        O_reg_dst   <= 0;
+        R_ext_op    <= 2'b0;
+        R_alu_src   <= 1'b0;
+        R_alu_op    <= 0;
+        R_mem_write <= 0;
+        R_reg_src   <= 3'b0;
+        R_reg_dst   <= 2'b0;
         //tempdata_1       <= 32'b0;
         //tempdata_2       <= 32'b0;
         //temp_state       <= 2'b00;
     end
-    else  begin
+    else begin
         // if (temp_state == 2'b01) begin
         //     O_reg1_data <= tempdata_1;
         //     O_reg2_data <= I_reg2_data;
@@ -100,25 +119,28 @@ always @ (posedge clk) begin
         //     temp_state    <= 2'b00;
         // end
         //else begin
-        O_reg1_data <= I_reg1_data;
-        O_reg2_data <= I_reg2_data;
+        R_reg1_data <= I_reg1_data;
+        R_reg2_data <= I_reg2_data;
         //end
 
-        O_nnpc      <= I_nnpc;
+        R_nnpc      <= I_nnpc;
         //O_rs           <= I_rs;
-        O_rt           <= I_rt;
-        O_rd           <= I_rd;
-        O_sa           <= I_sa;
-        O_imm16        <= I_imm16;
+        R_rt           <= I_rt;
+        R_rd           <= I_rd;
+        R_sa           <= I_sa;
+        R_imm16        <= I_imm16;
 
-        O_reg_write<= I_reg_write;
+        R_reg_write<= I_reg_write;
         //en_lw_id_ex_out  <= en_lw_id_ex_in;
-        O_ext_op    <= I_ext_op;
-        O_alu_src   <= I_alu_src;
-        O_alu_op    <= I_alu_op;
-        O_mem_write <= I_mem_write;
-        O_reg_src   <= I_reg_src;
-        O_reg_dst   <= I_reg_dst;
+        R_ext_op    <= I_ext_op;
+        R_alu_src   <= I_alu_src;
+        R_alu_op    <= I_alu_op;
+        R_mem_write <= I_mem_write;
+        R_reg_src   <= I_reg_src;
+        R_reg_dst   <= I_reg_dst;
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        ///////////////////////////////////////////////////////////////////////////////////////////////
     end
     // else if(stall_C[2] == 1 && stall_C[3] == 0) begin
     //     O_reg1_data    <= 32'b0;
@@ -143,5 +165,23 @@ always @ (posedge clk) begin
         // do nothing
     //end
 end
+
+assign    O_reg1_data =(I_pause)?32'b0: R_reg1_data;
+assign    O_reg2_data =(I_pause)?32'b0: R_reg2_data;
+        //end
+
+assign    O_nnpc      =(I_pause)?32'b0: R_nnpc;
+assign    O_rt        =(I_pause)?5'b0: R_rt;
+assign    O_rd        =(I_pause)?5'b0: R_rd;
+assign    O_sa        =(I_pause)?5'b0: R_sa;
+assign    O_imm16     =(I_pause)?16'b0: R_imm16;
+
+assign    O_reg_write =(I_pause)?0: R_reg_write;
+assign    O_ext_op    =(I_pause)?2'b0: R_ext_op;
+assign    O_alu_src   =(I_pause)?1'b0: R_alu_src;
+assign    O_alu_op    =(I_pause)?0: R_alu_op;
+assign    O_mem_write =(I_pause)?0: R_mem_write;
+assign    O_reg_src   =(I_pause)?0: R_reg_src;
+assign    O_reg_dst   =(I_pause)?0: R_reg_dst;
 
 endmodule

@@ -5,7 +5,8 @@ module IF(
             input         rst,
             input  [31:0] instructions_in,
             input  [31:0] I_nnpc,
-            //input  wire[3:0]  stall_C,
+            //input         I_pause,
+
             output [31:0]  O_nnpc,
             output [31:0]  O_instructions_out
        );
