@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module reg_mem_wb(
+module MEM(
             input wire                        clk,
             input wire                        rst,
             input wire[31:0]                  I_alu_result,
