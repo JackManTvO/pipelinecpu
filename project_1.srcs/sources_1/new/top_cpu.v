@@ -26,72 +26,9 @@ module top_cpu(
        );
 
 
-
-
-
-
-
-wire SignimmD;
-wire PCPlus4D;
-
-wire RegWriteD;
-wire MemtoRegD;
-wire MemWriteD;
-wire BranchD;
-wire ALUControlD;
-wire ALUSrcD;
-wire RegDstD;
-
-
-wire SrcAE;
-wire SrcB0E;
-wire SrcBE;
-wire WriteDataE;
-wire RtE;
-wire RDE;
-wire [4:0] WriteRegE;
-wire SignImmE;
-wire SignImmL2E;
-wire PCPlus4E;
-wire ZeroE;
-wire ALUOutE;
-wire PCBranchE;
-
-wire RegWriteE;
-wire MemtoRegE;
-wire MemWriteE;
-wire BranchE;
-wire ALUControlE;
-wire ALUSrcE;
-wire RegDstE;
-
-
-wire ZeroM;
-wire ALUOutM;
-wire WriteDataM;
-wire [4:0] WriteRegM;
-wire PCBranchM;
-wire ReadDataM;
-
-wire RegWriteM;
-wire MemtoRegM;
-wire MemWriteM;
-wire BranchM;
-wire PCSrcM;
-
-
-wire ALUOutW;
-wire ReadDataW;
-
-
-wire RegWriteW;
-wire MemtoRegW;
-
-
-
 wire [31:0] new_pc;
 wire [31:0] c_jnop_pc;
-wire [31:0] c_dnop_pc;
+wire  c_dnop_pc;
 wire [31:0] pc_inst;
 
 pc pc(
@@ -105,12 +42,10 @@ pc pc(
      );
 
 wire [31:0] InstrM; //from Mem
-wire c_nop_pc;
 
 iMem iMem(
-            .I_add(pc_inst[11:2]),
-            .I_nop_sig(c_nop_pc),
-            .O_instr(InstrM)
+            .I_addr(pc_inst[11:2]),
+            .O_idata(InstrM)
         );
 
 
@@ -144,11 +79,11 @@ wire[31:0] if_instr;
 
 IF IF(
         .clk(I_clk),
-        .rst(I_rst0),
+        .rst(I_rst),
         .instructions_in(InstrM),
         .I_nnpc(mux_npc),
         .O_nnpc(if_nnpc),
-        .O_instruction_out(if_instr)
+        .O_instructions_out(if_instr)
 );
 
 wire [5:0] if_InstrOpcode;
@@ -198,13 +133,13 @@ regfile regfile(
             .I_wb_addr(WriteRegW),
             .I_wb_data(ResultW),
 
-            .O_rFs_data(reg_rd1),
+            .O_rs_data(reg_rd1),
             .O_rt_data(reg_rd2)
         );
 
 
-wire[1:0] bralu_res;
-bralu bralu(
+wire[2:0] bralu_res;
+brALU bralu(
             .I_alu_num1(reg_rd1),
             .I_alu_num2(reg_rd2),
             .O_zero(bralu_res)
@@ -245,7 +180,7 @@ control control(
         .I_func(if_Instrfunc),
         .I_br_zero(bralu_res),
         .O_reg_w(c_reg_w),
-        .O_mem_v(c_mem_w),
+        .O_mem_w(c_mem_w),
         .O_alu_mux(c_alu_src),
         .O_rwd_mux(c_wrb_mux),
         .O_rwa_mux(c_reg_dst),
@@ -296,14 +231,14 @@ wire[31:0] id_nnpc;
 wire[31:0] id_reg_rd1;
 wire[31:0] id_red_rd2;
 wire[15:0] id_instrimm16;
-wire[5:0] id_instrRt;
-wire[5:0] id_instrRd;
-wire[5:0] id_instrSa;
+wire[4:0] id_instrRt;
+wire[4:0] id_instrRd;
+wire[4:0] id_instrSa;
 
-wire id_c_red_dst;
+wire id_c_reg_dst;
 wire[1:0] id_c_ext_op;
 wire id_c_alu_src;
-wire[4:0] id_c_alu_op;
+wire[3:0] id_c_alu_op;
 wire id_c_mem_w;
 wire[2:0] id_c_wrb_mux;
 wire id_c_reg_w;
@@ -334,10 +269,9 @@ ID ID(
 .O_reg1_data(id_reg_rd1),
 .O_reg2_data(id_red_rd2),
 .O_nnpc(id_nnpc),
-.rs_out(id_red_rd2),
 .O_rt(id_instrRt),
 .O_rd(id_instrRd),
-.O_sa(id_instrsa),
+.O_sa(id_instrSa),
 .O_imm16(id_instrimm16),
 
 .O_reg_write(id_c_reg_w),
@@ -346,7 +280,7 @@ ID ID(
 .O_alu_op(id_c_alu_op),
 .O_mem_write(id_c_mem_w),
 .O_reg_src(id_c_wrb_mux),
-.O_reg_dst(id_c_red_dst)
+.O_reg_dst(id_c_reg_dst)
 
 
 );
@@ -399,7 +333,7 @@ wire[4:0] muxa_dst_reg;
 mux_rwa mux_rwa_exe(
                     .I_rt(id_instrRt),
                     .I_rd(id_instrRd),
-                    .I_c(id_c_red_dst),
+                    .I_c(id_c_reg_dst),
                     .O_out(muxa_dst_reg)
 );
 
@@ -418,7 +352,7 @@ wire[31:0] alu_res;
 
 alu alu(
         .I_cA(id_c_alu_op),
-        .sa(id_instrsa),
+        .sa(id_instrSa),
         .I_alu_num1(id_reg_rd1),
         .I_alu_num2(alu_input2),
         .O_ans(alu_res)
@@ -455,7 +389,7 @@ EXE EXE(
         .O_destination_reg(exe_dst_reg),
 
         .O_mem_write(exe_c_mem_w),
-        .O_reg_src(exe_c_reg_src),
+        .O_reg_src(exe_c_wrb_mux),
         .O_reg_write(exe_c_reg_w)
 
 );
@@ -473,7 +407,6 @@ EXE EXE(
 wire[31:0] dmem_data;
 
 dMem dMem(
-            .I_clk(I_clk),
             .I_we(exe_c_mem_w),
             .I_addr(exe_alu_res[11:2]),
             .I_wdata(exe_reg2_data),
@@ -488,7 +421,6 @@ wire[4:0] mem_dst_reg;
 
 wire[2:0] mem_c_reg_src;
 
-
 MEM MEM(
         .clk(I_clk),
         .rst(I_rst),
@@ -498,7 +430,7 @@ MEM MEM(
         .I_extended_imm(exe_ext_res),
         .I_dst_reg(exe_dst_reg),
 
-        .I_reg_src(exe_c_reg_src),
+        .I_reg_src(exe_c_wrb_mux),
         .I_reg_write(exe_c_reg_w),
 
         .O_alu_result(mem_alu_res),
@@ -520,6 +452,7 @@ MEM MEM(
     //     input [2:0] I_c,
     //     output [31:0]O_out
     // );
+
 
 mux_rwd mux_rwd(
 .I_ext(mem_ext_res),

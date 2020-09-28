@@ -23,7 +23,7 @@
 module control(
          input [5:0] I_opcode,
          input [5:0] I_func,
-         input [1:0] I_br_zero,
+         input [2:0] I_br_zero,
 
 
          output O_reg_w,

@@ -98,32 +98,16 @@ endmodule
     );
 reg [31:0] R_out;
 always @ (*) begin
-    case (I_c)
-        1:
-            R_out<=I_off;
-        0:
-            R_out<=I_off+I_pc;
-    endcase
+    if (I_c==1)
+        R_out<=I_off;
+    else if(I_c==0)
+        R_out<=I_off+I_pc;
+    else
+        R_out<=I_off+I_pc;
 end
 assign O_out=R_out;
 assign O_output_npc=R_out+4;
 endmodule
 
 
-    module mux_offset(
-        input [31:0] I_beq,
-
-        input I_c,
-        output [31:0] O_out
-    );
-reg [31:0] R_out;
-always @ (*) begin
-    case (I_c)
-        1:
-            R_out<=I_beq;
-        0:
-            R_out<=32'h4;
-    endcase
-end
-assign O_out=R_out;
-endmodule
+ 

@@ -24,7 +24,7 @@ module EXE(
             output reg[4:0]                   O_destination_reg,
 
             output reg                       O_mem_write,
-            output reg[31:0]                  O_reg_src,
+            output reg[2:0]                  O_reg_src,
             output reg                        O_reg_write
             //output reg                        en_lw_ex_mem_out
        );
@@ -41,7 +41,7 @@ always @ (posedge clk) begin
         O_extended_imm    <= 32'b0;
         O_destination_reg <= 5'b0;
         O_mem_write    <= 0;
-        O_reg_src      <= 32'b0;
+        O_reg_src      <= 3'b0;
         O_reg_write   <= 1'b0;
         //en_lw_ex_mem_out    <= `EN_LW_DEFAULT;
     end

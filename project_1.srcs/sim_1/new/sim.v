@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 09/12/2020 06:53:42 PM
+// Create Date: 2020/09/12 23:41:16
 // Design Name: 
-// Module Name: sim
+// Module Name: testbench
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -22,22 +22,22 @@
 
 module testbench();
 reg clk;
-reg rst;
-top_cpu top_cpu(clk, rst);
+reg reset;
+top_cpu TOPFUNC(clk, reset);
 
 initial begin
-    $readmemh("D:/instr.txt", top_cpu.imem.R_imem);
+    // Load instructions
+    $readmemh("D:/instructions.txt", TOPFUNC.iMem.I_addr);
     // Load register initial values
-    $readmemh("D:/register.txt", top_cpu.regfile.R_gpr);
+    $readmemh("D:/registers.txt", TOPFUNC.regfile.I_wb_addr);
     // Load memory data initial values
-    $readmemh("D:/data_memory.txt", top_cpu.dMem.R_dMem);
-    rst = 1;
+    $readmemh("D:/datamemory.txt", TOPFUNC.dMem.I_addr);
+    
+    reset = 1;
     clk = 0;
-
-    #30 rst = 0;
-    #500 $stop;
+    #15 reset = 0; // 15ns开始运行
+    #1000 $stop;  // 1000ns停止
 end
-
 always
-    #20 clk = ~clk;
+    #10 clk = ~clk; // 每隔10nsclk翻转
 endmodule

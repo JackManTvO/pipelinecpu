@@ -21,11 +21,10 @@
 
 
 module iMem(
-           input [11:2] I_addr,
-            input I_nop_sig,
-           output [31:0] O_idata
+           input wire[11:2] I_addr,
+           output wire[31:0] O_idata
        );
 reg [31:0] R_imem[1023:0];
 
-assign O_idata=(!I_nop_sig)?R_imem[I_addr]:32'b0;
+assign O_idata=R_imem[I_addr];
 endmodule

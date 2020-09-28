@@ -31,7 +31,7 @@ module br(
            input [31:0] I_rs_data, 
            //output [31:0] O_jump,
            //output [31:0] O_offset,
-           output [31:0] O_output_pc
+           output reg [31:0] O_output_pc
        );
 
 reg [31:0] R_offset;
@@ -49,7 +49,16 @@ always @ (*) begin
         R_jump<={I_pc[31:28],I_imm26,2'b00};
     else if(I_cB==3'b110)
         R_jump<=I_rs_data;
+    else
+        R_offset<=32'h4;
 end
 
-assign O_output_pc=(I_cB<=3'b100)?R_offset:R_jump;
+always @(*) begin
+    if(I_cB==3'b101||I_cB==3'b110) begin
+        O_output_pc<=R_jump;
+
+    end
+    else
+        O_output_pc<=R_offset;
+end
 endmodule

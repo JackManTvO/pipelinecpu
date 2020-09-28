@@ -21,7 +21,6 @@
 
 
 module dMem(
-           input I_clk,
            input I_we,
 
            input [11:2] I_addr,
@@ -33,7 +32,7 @@ module dMem(
 reg [31:0] R_dMem[1023:0];
 assign O_rdata=R_dMem[I_addr];
 
-always @(posedge I_clk) begin
+always @(*) begin
     if(I_we) begin
         R_dMem[I_addr]<=I_wdata;
     end

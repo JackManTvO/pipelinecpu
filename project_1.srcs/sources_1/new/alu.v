@@ -25,8 +25,7 @@ module alu(
            input [4:0]  sa,
            input [31:0] I_alu_num1,
            input [31:0] I_alu_num2,
-           output [31:0] O_ans,
-           output wire overflow 
+           output [31:0] O_ans
        );
 
 reg [32:0] R_alu;
